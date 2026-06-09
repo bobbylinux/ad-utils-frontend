@@ -1,4 +1,4 @@
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import "./CreateADUser.css";
 
 // Definiamo il tipo per lo stato della nostra richiesta
@@ -17,11 +17,18 @@ function CreateADUser() {
   // - state: il risultato corrente dell'azione
   // - formAction: la funzione da passare al tag <form>
   // - isPending: un booleano che indica se la richiesta HTTP è in corso
+
+  const [userType, setUserType] = useState("");
+
   const [state, formAction, isPending] = useActionState(
     async (
       _prevState: ActionState,
       formData: FormData,
     ): Promise<ActionState> => {
+      if (formData.get("user_type") === "EXT") {
+        formData.set("user_id", "");
+      }
+
       const user_id = formData.get("user_id");
       const first_name = formData
         .get("first_name")
@@ -89,7 +96,6 @@ function CreateADUser() {
           </h1>
 
           <form action={formAction} className="space-y-4">
-            {/* MENU A TENDINA (SELECT) AGGIUNTO QUI */}
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">
                 Tipologia Utente
@@ -98,12 +104,11 @@ function CreateADUser() {
                 name="script_type"
                 defaultValue=""
                 required
+                onChange={(e) => setUserType(e.target.value)}
                 disabled={isPending}
                 className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-hidden disabled:bg-slate-100 cursor-pointer"
               >
-                <option value="DIP" selected>
-                  Dipendente
-                </option>
+                <option value="DIP">Dipendente</option>
                 <option value="EXT">Personale Esterno</option>
                 <option value="MMG">
                   Abilitazione Scarico Referti (MMG_PLS)
@@ -111,20 +116,20 @@ function CreateADUser() {
                 <option value="O4C">Abilitazione O4C Argos</option>
               </select>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">
-                Matricola
-              </label>
-              <input
-                name="user_id"
-                type="number"
-                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-hidden disabled:bg-slate-100"
-                placeholder="es. 123456"
-                disabled={isPending}
-              />
-            </div>
-
+            {userType !== "EXT" && (
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">
+                  Matricola
+                </label>
+                <input
+                  name="user_id"
+                  type="number"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-hidden disabled:bg-slate-100"
+                  placeholder="es. 123456"
+                  disabled={isPending}
+                />
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">
                 Nome
