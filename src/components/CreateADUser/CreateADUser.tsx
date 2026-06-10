@@ -1,4 +1,4 @@
-import { useActionState, useState } from "react";
+import { useActionState, useState, useEffect, useRef } from "react";
 import "./CreateADUser.css";
 
 // Definiamo il tipo per lo stato della nostra richiesta
@@ -13,19 +13,16 @@ const initialState: ActionState = {
 };
 
 function CreateADUser() {
-  // useActionState riceve la funzione asincrona, lo stato iniziale e restituisce:
-  // - state: il risultato corrente dell'azione
-  // - formAction: la funzione da passare al tag <form>
-  // - isPending: un booleano che indica se la richiesta HTTP è in corso
-
   const [userType, setUserType] = useState("");
+  // Ref per resettare nativamente il form in modo sicuro se necessario
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [state, formAction, isPending] = useActionState(
     async (
       _prevState: ActionState,
       formData: FormData,
     ): Promise<ActionState> => {
-      if (formData.get("user_type") === "EXT") {
+      if (formData.get("script_type") === "EXT") {
         formData.set("user_id", "");
       }
 
@@ -64,8 +61,28 @@ function CreateADUser() {
           }),
         });
 
+        // Se la risposta non è OK, proviamo a estrarre i dettagli personalizzati dal JSON
         if (!response.ok) {
-          throw new Error("Errore durante la creazione dell'utente.");
+          try {
+            const errorData = await response.json();
+            const errorMsg =
+              errorData.error || "Errore durante la creazione dell'utente.";
+            const dettaglioMsg = errorData.dettaglio
+              ? `\nDettaglio: ${errorData.dettaglio}`
+              : "";
+
+            return {
+              success: false,
+              message: `${errorMsg}${dettaglioMsg}`,
+            };
+          } catch {
+            // Fallback se la response non è un JSON valido
+            return {
+              success: false,
+              message:
+                "Errore durante la creazione dell'utente (Risposta server non valida).",
+            };
+          }
         }
 
         const data = await response.json();
@@ -80,12 +97,21 @@ function CreateADUser() {
           message:
             error instanceof Error
               ? error.message
-              : `Si è verificato un errore!\n ${error}`,
+              : `Si è verificato un errore imprevisto!\n ${error}`,
         };
       }
     },
     initialState,
   );
+
+  // Questo effetto si attiva quando lo stato cambia.
+  // Se l'operazione ha avuto successo, resettiamo anche lo stato locale del tipo utente
+  useEffect(() => {
+    if (state.success) {
+      // setUserType("");
+      formRef.current?.reset(); // Forza il reset del form per sicurezza
+    }
+  }, [state]);
 
   return (
     <>
@@ -95,20 +121,20 @@ function CreateADUser() {
             Creazione Nuovo Utente Active Directory
           </h1>
 
-          <form action={formAction} className="space-y-4">
+          <form ref={formRef} action={formAction} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">
                 Tipologia Utente
               </label>
               <select
                 name="script_type"
-                defaultValue=""
+                value={userType} // Cambiato da defaultValue a value per renderlo controllato
                 required
                 onChange={(e) => setUserType(e.target.value)}
                 disabled={isPending}
                 className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-hidden disabled:bg-slate-100 cursor-pointer"
               >
-                <option value="DIP">Dipendente</option>
+                <option value="DIP">Dipendente</option>{" "}
                 <option value="EXT">Personale Esterno</option>
                 <option value="MMG">
                   Abilitazione Scarico Referti (MMG_PLS)
@@ -116,6 +142,7 @@ function CreateADUser() {
                 <option value="O4C">Abilitazione O4C Argos</option>
               </select>
             </div>
+
             {userType !== "EXT" && (
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">
@@ -127,9 +154,11 @@ function CreateADUser() {
                   className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-hidden disabled:bg-slate-100"
                   placeholder="es. 123456"
                   disabled={isPending}
+                  required={userType !== "EXT"} // Rende la matricola obbligatoria se non è esterno
                 />
               </div>
             )}
+
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">
                 Nome
@@ -198,7 +227,7 @@ function CreateADUser() {
           {/* Feedback visivo per l'utente (Successo / Errore) */}
           {state.message && (
             <div
-              className={`mt-4 p-3 rounded-lg text-sm text-center font-medium ${
+              className={`mt-4 p-3 rounded-lg text-sm text-center font-medium whitespace-pre-line ${
                 state.success
                   ? "bg-green-100 text-green-800"
                   : "bg-red-100 text-red-800"
