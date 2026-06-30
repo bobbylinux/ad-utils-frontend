@@ -1,7 +1,7 @@
 import { useActionState, useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import "./CreateADUser.css";
 
-// Definiamo il tipo per lo stato della nostra richiesta
 interface ActionState {
   success: boolean | null;
   message: string | null;
@@ -61,7 +61,6 @@ function CreateADUser() {
           }),
         });
 
-        // Se la risposta non è OK, proviamo a estrarre i dettagli personalizzati dal JSON
         if (!response.ok) {
           try {
             const errorData = await response.json();
@@ -103,20 +102,25 @@ function CreateADUser() {
     },
     initialState,
   );
-
-  // Questo effetto si attiva quando lo stato cambia.
-  // Se l'operazione ha avuto successo, resettiamo anche lo stato locale del tipo utente
   useEffect(() => {
     if (state.success) {
       // setUserType("");
-      formRef.current?.reset(); // Forza il reset del form per sicurezza
+      formRef.current?.reset();
     }
   }, [state]);
 
   return (
     <>
-      <div className="flex min-h-screen items-center justify-center bg-blue-300 p-6">
+      <div className="flex items-center justify-center bg-blue-300 p-6 m-50">
         <div className="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-xl">
+          <div className="mb-6">
+            <Link
+              to="/"
+              className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              ← Torna alla Home
+            </Link>
+          </div>
           <h1 className="mb-6 text-2xl font-bold text-slate-700 text-center">
             Creazione Nuovo Utente Active Directory
           </h1>

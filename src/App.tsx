@@ -8,16 +8,18 @@ import Footer from "./components/Footer/Footer";
 function App() {
   return (
     <>
-      <Header></Header>
-      <section className="">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/create_ad_users" element={<CreateADUser />} />
-          </Routes>
-        </BrowserRouter>
-      </section>
-      <Footer></Footer>
+      <BrowserRouter>
+        <div className="flex h-screen flex-col bg-blue-300">
+          <Header></Header>
+          <main className="flex-1 overflow-y-auto">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/create_ad_users" element={<CreateADUser />} />
+            </Routes>
+          </main>
+          <Footer></Footer>
+        </div>
+      </BrowserRouter>
     </>
   );
 }
