@@ -132,7 +132,7 @@ function CreateADUser() {
               </label>
               <select
                 name="script_type"
-                value={userType} // Cambiato da defaultValue a value per renderlo controllato
+                value={userType}
                 required
                 onChange={(e) => setUserType(e.target.value)}
                 disabled={isPending}
