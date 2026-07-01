@@ -19,14 +19,14 @@ function Home() {
       </div>
       <div className="w-full max-w-sm">
         <div className="rounded-xl bg-white shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow cursor-pointer">
-          <Link to="/create_ad_users">
+          <Link to="/verify_ad_user">
             <h2 className="text-xl font-semibold text-slate-800">
               Verifica Censimento Utenti AD UC
             </h2>
 
             <p className="mt-2 text-sm text-slate-600">
-              Gestione e creazione di nuovi utenti all'interno di Active
-              Directory Users and Computers.
+              Verifica esistenza utenti o gruppi all'interno di Active Directory
+              Users and Computers.
             </p>
           </Link>
         </div>

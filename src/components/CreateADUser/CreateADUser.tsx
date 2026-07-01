@@ -111,7 +111,7 @@ function CreateADUser() {
 
   return (
     <>
-      <div className="flex items-center justify-center bg-blue-300 p-6 m-50">
+      <div className="flex items-center justify-center bg-blue-300 p-6">
         <div className="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-xl">
           <div className="mb-6">
             <Link
