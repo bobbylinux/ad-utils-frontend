@@ -1,0 +1,25 @@
+#nota - il file .env deve essere nella stessa dir del docker-compose.yaml
+services:
+  backend:
+    image: bobbylinux/ad-utilities-backend:1.0.0
+    container_name: ad-utilities-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - ad-utilities-network
+
+  frontend:
+    image: bobbylinux/ad-utilities-frontend:1.0.0
+    container_name: ad-utilities-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - ad-utilities-network
+
+networks:
+  ad-utilities-network:
+    driver: bridge
